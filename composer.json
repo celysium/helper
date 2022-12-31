@@ -1,0 +1,33 @@
+{
+    "name": "celysium/base-structure",
+    "description": "The base structure package.",
+    "keywords": [
+        "Laravel",
+        "Base sructure",
+        "repository"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Celysium\\BaseStructure\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nasser Hekmati",
+            "email": "hekmati.nasser@gmail.com"
+        },
+        {
+            "name": "Ehsan Tavakoli",
+            "email": "ehsantavakoli1995@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0.2",
+        "illuminate/http": "^9.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^7.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
