@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 interface BaseRepositoryInterface
 {
-    public function list(array $parameters = []): LengthAwarePaginator|Collection;
+    public function index(array $parameters = []): LengthAwarePaginator|Collection;
 
     public function show(Model $model): Model;
 

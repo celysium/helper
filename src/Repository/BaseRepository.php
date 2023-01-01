@@ -18,7 +18,7 @@ class BaseRepository implements BaseRepositoryInterface
         return $query ?? $this->model->query();
     }
 
-    public function list(array $parameters = []): LengthAwarePaginator|Collection
+    public function index(array $parameters = []): LengthAwarePaginator|Collection
     {
         $query = $this->applyFilters(null, $parameters);
 
