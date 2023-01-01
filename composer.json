@@ -3,7 +3,8 @@
     "description": "The base structure package.",
     "keywords": [
         "Laravel",
-        "Base sructure",
+        "base",
+        "sructure",
         "repository"
     ],
     "autoload": {
