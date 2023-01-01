@@ -45,7 +45,7 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->query()->findOrFail($id);
     }
 
-    public function create(array $parameters): Model
+    public function store(array $parameters): Model
     {
         return $this->model->query()
             ->create($parameters);

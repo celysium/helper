@@ -15,7 +15,7 @@ interface BaseRepositoryInterface
 
     public function findOrFail(int|string $id): ?Model;
 
-    public function create(array $parameters): Model;
+    public function store(array $parameters): Model;
 
     public function update(Model $model, array $parameters): Model;
 
