@@ -5,29 +5,61 @@ namespace Celysium\BaseStructure\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class BaseRepository implements BaseRepositoryInterface
 {
+    private array $columns;
+
     public function __construct(protected Model $model)
     {
     }
 
-    public function applyFilters(Builder $query = null, array $parameters = []): Builder
+
+    public function rules(): array
     {
-        return $query ?? $this->model->query();
+        return [];
+    }
+
+    public function filters(array $parameters = [], array $columns = ['*']): array
+    {
+        $this->columns = $columns;
+        $rules = $this->rules();
+        if(empty($rules)) {
+            return [];
+        }
+        $conditions = [];
+        foreach ($parameters as $key => $value) {
+            if(isset($rules[$key])) {
+                $conditions[] = [$key, $rules[$key], $value];
+            }
+        }
+        return $conditions;
+    }
+
+    public function query(Builder $query): Builder
+    {
+        return $query;
     }
 
     public function index(array $parameters = []): LengthAwarePaginator|Collection
     {
-        $query = $this->applyFilters(null, $parameters);
+        $query = $this->model->query();
+
+        $query = $this->query($query);
+
+        $conditions = $this->filters($parameters);
+        if(! empty($conditions)) {
+            $query->where($conditions);
+        }
 
         $query->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
 
         if (isset($parameters['paginate']) && !$parameters['paginate'])
-            return $query->get();
+            return $query->get($this->columns);
         else
-            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage());
+            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $this->columns);
     }
 
     public function show(Model $model): Model
