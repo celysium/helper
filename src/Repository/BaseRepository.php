@@ -42,7 +42,8 @@ class BaseRepository implements BaseRepositoryInterface
     {
         $query = $this->model->query();
 
-        if($conditions = $this->filters($parameters)) {
+        $conditions = $this->filters($parameters);
+        if(! empty($conditions)) {
             $query->where($conditions);
         }
 
