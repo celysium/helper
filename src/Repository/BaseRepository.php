@@ -38,9 +38,16 @@ class BaseRepository implements BaseRepositoryInterface
         return $conditions;
     }
 
+    public function query(Builder $query): Builder
+    {
+        return $query;
+    }
+
     public function index(array $parameters = []): LengthAwarePaginator|Collection
     {
         $query = $this->model->query();
+
+        $query = $this->query($query);
 
         $conditions = $this->filters($parameters);
         if(! empty($conditions)) {
