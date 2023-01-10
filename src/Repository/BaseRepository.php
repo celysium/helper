@@ -5,6 +5,7 @@ namespace Celysium\BaseStructure\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class BaseRepository implements BaseRepositoryInterface
@@ -15,18 +16,35 @@ class BaseRepository implements BaseRepositoryInterface
     {
     }
 
-    public function applyFilters(Builder $query = null, array $parameters = [], array $columns = ['*']): Builder
+
+    public function rules(): array
     {
-        $this->columns = $columns;
-        return $query ?? $this->model->query();
+        return [];
     }
 
-    public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
+    public function filters(array $parameters = [], array $columns = ['*']): array
     {
-        if(empty($this->columns)) {
-            $this->columns = $columns;
+        $this->columns = $columns;
+        $rules = $this->rules();
+        if(empty($rules)) {
+            return [];
         }
-        $query = $this->applyFilters(null, $parameters);
+        $conditions = [];
+        foreach ($parameters as $key => $value) {
+            if(isset($rules[$key])) {
+                $conditions[] = [$key, $rules[$key], $value];
+            }
+        }
+        return $conditions;
+    }
+
+    public function index(array $parameters = []): LengthAwarePaginator|Collection
+    {
+        $query = $this->model->query();
+
+        if($conditions = $this->filters($parameters)) {
+            $query->where($conditions);
+        }
 
         $query->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
 
