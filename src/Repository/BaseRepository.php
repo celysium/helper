@@ -38,7 +38,7 @@ class BaseRepository implements BaseRepositoryInterface
         return $conditions;
     }
 
-    public function query(Builder $query): Builder
+    public function query(Builder $query, array $parameters): Builder
     {
         return $query;
     }
@@ -47,7 +47,7 @@ class BaseRepository implements BaseRepositoryInterface
     {
         $query = $this->model->query();
 
-        $query = $this->query($query);
+        $query = $this->query($query, $parameters);
 
         $conditions = $this->filters($parameters);
         if(! empty($conditions)) {
