@@ -8,9 +8,9 @@ use Illuminate\Support\Collection;
 
 interface BaseRepositoryInterface
 {
-    public function index(array $parameters = []): LengthAwarePaginator|Collection;
+    public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection;
 
-    public function applyFilters(Builder $query = null, array $parameters = []): Builder;
+    public function applyFilters(Builder $query = null, array $parameters = [], array $columns = ['*']): Builder;
 
     public function show(Model $model): Model;
 

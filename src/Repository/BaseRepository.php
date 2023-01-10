@@ -9,25 +9,31 @@ use Illuminate\Support\Collection;
 
 class BaseRepository implements BaseRepositoryInterface
 {
+    private array $columns;
+
     public function __construct(protected Model $model)
     {
     }
 
-    public function applyFilters(Builder $query = null, array $parameters = []): Builder
+    public function applyFilters(Builder $query = null, array $parameters = [], array $columns = ['*']): Builder
     {
+        $this->columns = $columns;
         return $query ?? $this->model->query();
     }
 
-    public function index(array $parameters = []): LengthAwarePaginator|Collection
+    public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
     {
+        if(empty($this->columns)) {
+            $this->columns = $columns;
+        }
         $query = $this->applyFilters(null, $parameters);
 
         $query->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
 
         if (isset($parameters['paginate']) && !$parameters['paginate'])
-            return $query->get();
+            return $query->get($this->columns);
         else
-            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage());
+            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $this->columns);
     }
 
     public function show(Model $model): Model
