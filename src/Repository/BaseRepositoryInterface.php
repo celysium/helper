@@ -14,7 +14,7 @@ interface BaseRepositoryInterface
 
     public function query(Builder $query, array $parameters): Builder;
 
-    public function filters(array $parameters = [], array $columns = ['*']): array;
+    public function filters(Builder $query, array $parameters = [], array $columns = ['*']): Builder;
 
     public function show(Model $model): Model;
 
