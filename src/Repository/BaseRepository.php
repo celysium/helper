@@ -2,15 +2,16 @@
 
 namespace Celysium\BaseStructure\Repository;
 
+use Celysium\BaseStructure\Operator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 
 class BaseRepository implements BaseRepositoryInterface
 {
     private array $columns;
+
 
     public function __construct(protected Model $model)
     {
@@ -22,20 +23,28 @@ class BaseRepository implements BaseRepositoryInterface
         return [];
     }
 
-    public function filters(array $parameters = [], array $columns = ['*']): array
+    public function filters(Builder $query, array $parameters = [], array $columns = ['*']): Builder
     {
         $this->columns = $columns;
         $rules = $this->rules();
         if(empty($rules)) {
-            return [];
+            return $query;
         }
-        $conditions = [];
-        foreach ($parameters as $key => $value) {
-            if(isset($rules[$key])) {
-                $conditions[] = [$key, $rules[$key], $value];
+        $operators = get_class_methods(Operator::class);
+        foreach ($parameters as $field => $value) {
+            if(isset($rules[$field])) {
+                if (in_array($rules[$field], $operators)) {
+                    call_user_func_array([Operator::class, $rules[$field]], [$query, $value]);
+                }
+                elseif (is_callable($rules[$field])) {
+                    $rules[$field]($query, $value);
+                }
+                else {
+                    $query->where($field, $rules[$field], $value);
+                }
             }
         }
-        return $conditions;
+        return $query;
     }
 
     public function query(Builder $query, array $parameters): Builder
@@ -49,10 +58,7 @@ class BaseRepository implements BaseRepositoryInterface
 
         $query = $this->query($query, $parameters);
 
-        $conditions = $this->filters($parameters);
-        if(! empty($conditions)) {
-            $query->where($conditions);
-        }
+        $query = $this->filters($query, $parameters);
 
         $query->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
 
