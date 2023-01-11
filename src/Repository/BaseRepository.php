@@ -34,10 +34,10 @@ class BaseRepository implements BaseRepositoryInterface
         foreach ($parameters as $field => $value) {
             if(isset($rules[$field])) {
                 if (in_array($rules[$field], $operators)) {
-                    $query = call_user_func_array([Operator::class, $rules[$field]], [$query, $value]);
+                    $query = call_user_func_array([Operator::class, $rules[$field]], [$query, $field, $value]);
                 }
                 elseif (is_callable($rules[$field])) {
-                    $query = $rules[$field]($query, $value);
+                    $query = $rules[$field]($query, $field, $value);
                 }
                 else {
                     $query->where($field, $rules[$field], $value);
