@@ -8,7 +8,7 @@ use Illuminate\Support\Collection;
 
 interface BaseRepositoryInterface
 {
-    public function index(array $parameters = []): LengthAwarePaginator|Collection;
+    public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection;
 
     public function rules(): array;
 

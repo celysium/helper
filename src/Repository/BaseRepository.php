@@ -52,7 +52,7 @@ class BaseRepository implements BaseRepositoryInterface
         return $query;
     }
 
-    public function index(array $parameters = []): LengthAwarePaginator|Collection
+    public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
     {
         $query = $this->model->query();
 
@@ -62,10 +62,12 @@ class BaseRepository implements BaseRepositoryInterface
 
         $query->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
 
+        $columns = $columns == $this->columns ? $columns : $this->columns;
+
         if (isset($parameters['paginate']) && !$parameters['paginate'])
-            return $query->get($this->columns);
+            return $query->get($columns);
         else
-            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $this->columns);
+            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
     }
 
     public function show(Model $model): Model
