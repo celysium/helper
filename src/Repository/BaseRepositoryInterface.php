@@ -1,5 +1,5 @@
 <?php
-namespace Celysium\BaseStructure\Repository;
+namespace Celysium\Base\Repository;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
