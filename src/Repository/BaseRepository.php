@@ -1,8 +1,8 @@
 <?php
 
-namespace Celysium\BaseStructure\Repository;
+namespace Celysium\Base\Repository;
 
-use Celysium\BaseStructure\Operator;
+use Celysium\Base\Operator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -30,11 +30,11 @@ class BaseRepository implements BaseRepositoryInterface
         if(empty($rules)) {
             return $query;
         }
-        $operators = get_class_methods(Operator::class);
+        $operators = array_keys(Operator::$operators);
         foreach ($parameters as $field => $value) {
             if(isset($rules[$field])) {
                 if (in_array($rules[$field], $operators)) {
-                    $query = call_user_func_array([Operator::class, $rules[$field]], [$query, $value]);
+                    $query = call_user_func_array([Operator::class, Operator::$operators[$rules[$field]]], [$query, $value]);
                 }
                 elseif (is_callable($rules[$field])) {
                     $query = $rules[$field]($query, $value);
