@@ -2,7 +2,6 @@
 
 namespace Celysium\Base\Repository;
 
-use Celysium\Base\Operator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -27,20 +26,13 @@ class BaseRepository implements BaseRepositoryInterface
     {
         $this->columns = $columns;
         $rules = $this->rules();
-        if(empty($rules)) {
-            return $query;
-        }
-        $operators = array_keys(Operator::$operators);
-        foreach ($parameters as $field => $value) {
-            if(isset($rules[$field])) {
-                if (in_array($rules[$field], $operators)) {
-                    $query = call_user_func_array([Operator::class, Operator::$operators[$rules[$field]]], [$query, $value]);
-                }
-                elseif (is_callable($rules[$field])) {
-                    $query = $rules[$field]($query, $value);
+        foreach ($rules as $field => $condition) {
+            if(array_key_exists($field, $parameters)) {
+                if (is_callable($condition)) {
+                    $query = $condition($query, $parameters[$field]);
                 }
                 else {
-                    $query->where($field, $rules[$field], $value);
+                    $query->where($field, $condition, $parameters[$field]);
                 }
             }
         }
