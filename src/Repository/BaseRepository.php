@@ -91,13 +91,13 @@ class BaseRepository implements BaseRepositoryInterface
         return $model->refresh();
     }
 
-    public function updateById(int|string $id, array $parameters): ?Model
+    public function updateById(int|string $id, array $parameters): Model
     {
         $result = $this->model->query()
                 ->where($this->model->getKeyName(), $id)
-                ->update($parameters) > 0;
+                ->update($parameters);
 
-        if($result === false)  {
+        if($result === 0)  {
             throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
         }
 
