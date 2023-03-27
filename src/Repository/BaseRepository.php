@@ -4,6 +4,7 @@ namespace Celysium\Base\Repository;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -90,13 +91,17 @@ class BaseRepository implements BaseRepositoryInterface
         return $model->refresh();
     }
 
-    public function updateById(int|string $id, array $parameters): ?Model
+    public function updateById(int|string $id, array $parameters): Model
     {
         $result = $this->model->query()
                 ->where($this->model->getKeyName(), $id)
-                ->update($parameters) > 0;
+                ->update($parameters);
 
-        return $result ? $this->find($id) : null;
+        if($result === 0)  {
+            throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
+        }
+
+        return $this->find($id);
     }
 
     public function destroy(Model $model): bool
