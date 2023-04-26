@@ -10,11 +10,11 @@ interface BaseRepositoryInterface
 {
     public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection;
 
-    public function rules(): array;
+    public function conditions(): array;
 
-    public function query(Builder $query, array $parameters): Builder;
+    public function query(array $parameters): Builder;
 
-    public function filters(Builder $query, array $parameters = [], array $columns = ['*']): Builder;
+    public function filters(array $parameters = [], array $columns = ['*']): Builder;
 
     public function show(Model $model): Model;
 
