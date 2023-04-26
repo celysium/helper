@@ -12,55 +12,68 @@ class BaseRepository implements BaseRepositoryInterface
 {
     private array $columns;
 
+    protected Builder $query;
 
     public function __construct(protected Model $model)
     {
     }
 
 
-    public function rules(): array
+    public function conditions(): array
     {
         return [];
     }
 
-    public function filters(Builder $query, array $parameters = [], array $columns = ['*']): Builder
+    public function filters(array $parameters = [], array $columns = ['*']): Builder
     {
         $this->columns = $columns;
-        $rules = $this->rules();
+        $rules = $this->conditions();
         foreach ($rules as $field => $condition) {
-            if(array_key_exists($field, $parameters)) {
+            if (array_key_exists($field, $parameters)) {
                 if (is_callable($condition)) {
-                    $query = $condition($query, $parameters[$field]);
-                }
-                else {
-                    $query->where($field, $condition, $parameters[$field]);
+                    $this->query = $condition($parameters[$field]);
+                } else {
+                    $this->query->where($field, $condition, $parameters[$field]);
                 }
             }
         }
-        return $query;
+        return $this->query;
     }
 
-    public function query(Builder $query, array $parameters): Builder
+    public function query(array $parameters): Builder
     {
-        return $query;
+        return $this->query;
     }
 
     public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
     {
-        $query = $this->model->query();
+        $this->query = $this->model->query();
 
-        $query = $this->query($query, $parameters);
+        $this->query = $this->query($parameters);
 
-        $query = $this->filters($query, $parameters);
+        $this->query = $this->filters($parameters);
 
-        $query->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
+        $this->query = $this->sort($parameters);
 
-        $columns = $columns == $this->columns ? $columns : $this->columns;
+        return $this->export($parameters, $columns);
+    }
+
+    protected function sort(array $parameters): Builder
+    {
+        return $this->query
+            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
+    }
+
+    protected function export(array $parameters = [], array $columns = ['*']): Collection|LengthAwarePaginator|array
+    {
+        if ($columns != $this->columns) {
+            $this->columns = $columns;
+        }
 
         if (isset($parameters['paginate']) && !$parameters['paginate'])
-            return $query->get($columns);
+            return $this->query->get($columns);
         else
-            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
+            return $this->query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
     }
 
     public function show(Model $model): Model
@@ -94,10 +107,10 @@ class BaseRepository implements BaseRepositoryInterface
     public function updateById(int|string $id, array $parameters): Model
     {
         $result = $this->model->query()
-                ->where($this->model->getKeyName(), $id)
-                ->update($parameters);
+            ->where($this->model->getKeyName(), $id)
+            ->update($parameters);
 
-        if($result === 0)  {
+        if ($result === 0) {
             throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
         }
 
