@@ -26,7 +26,7 @@ class BaseRepository implements BaseRepositoryInterface
 
         $this->query = $this->query($this->query, $parameters);
 
-        $this->query = $this->filters($parameters);
+        $this->query = $this->filters($this->query, $parameters);
 
         $this->query = $this->sort($parameters);
 
@@ -43,20 +43,20 @@ class BaseRepository implements BaseRepositoryInterface
         return [];
     }
 
-    protected function filters(array $parameters = [], array $columns = ['*']): Builder
+    protected function filters(Builder $query, array $parameters = [], array $columns = ['*']): Builder
     {
         $this->columns = $columns;
-        $rules = $this->conditions($this->query);
+        $rules = $this->conditions($query);
         foreach ($rules as $field => $condition) {
             if (array_key_exists($field, $parameters)) {
                 if (is_callable($condition)) {
-                    $this->query = $condition($parameters[$field]);
+                    $query = $condition($parameters[$field]);
                 } else {
-                    $this->query->where($field, $condition, $parameters[$field]);
+                    $query->where($field, $condition, $parameters[$field]);
                 }
             }
         }
-        return $this->query;
+        return $query;
     }
 
     public function query(Builder $query, array $parameters): Builder
