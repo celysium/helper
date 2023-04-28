@@ -18,16 +18,28 @@ class BaseRepository implements BaseRepositoryInterface
     {
     }
 
+    public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
+    {
+        $this->query = $this->model->query();
 
-    public function conditions(): array
+        $this->query = $this->query($this->query, $parameters);
+
+        $this->query = $this->filters($parameters);
+
+        $this->query = $this->sort($parameters);
+
+        return $this->export($parameters, $columns);
+    }
+
+    public function conditions(Builder $query): array
     {
         return [];
     }
 
-    public function filters(array $parameters = [], array $columns = ['*']): Builder
+    protected function filters(array $parameters = [], array $columns = ['*']): Builder
     {
         $this->columns = $columns;
-        $rules = $this->conditions();
+        $rules = $this->conditions($this->query);
         foreach ($rules as $field => $condition) {
             if (array_key_exists($field, $parameters)) {
                 if (is_callable($condition)) {
@@ -40,22 +52,9 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->query;
     }
 
-    public function query(array $parameters): Builder
+    public function query(Builder $query, array $parameters): Builder
     {
-        return $this->query;
-    }
-
-    public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
-    {
-        $this->query = $this->model->query();
-
-        $this->query = $this->query($parameters);
-
-        $this->query = $this->filters($parameters);
-
-        $this->query = $this->sort($parameters);
-
-        return $this->export($parameters, $columns);
+        return $query;
     }
 
     protected function sort(array $parameters): Builder
