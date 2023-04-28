@@ -20,6 +20,8 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
     {
+        $parameters = array_merge($this->parameters(), $parameters);
+
         $this->query = $this->model->query();
 
         $this->query = $this->query($this->query, $parameters);
@@ -32,6 +34,11 @@ class BaseRepository implements BaseRepositoryInterface
     }
 
     public function conditions(Builder $query): array
+    {
+        return [];
+    }
+
+    public function parameters(): array
     {
         return [];
     }
