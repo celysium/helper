@@ -76,7 +76,7 @@ class BaseRepository implements BaseRepositoryInterface
             $this->columns = $columns;
         }
 
-        if (isset($parameters['paginate']) && !$parameters['paginate'])
+        if (isset($parameters['paginate']) && $parameters['paginate'] === false)
             return $this->query->get($columns);
         else
             return $this->query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
