@@ -66,8 +66,12 @@ class BaseRepository implements BaseRepositoryInterface
 
     protected function sort(array $parameters): Builder
     {
+        if (isset($parameters['sort_direction']) && !in_array($parameters['sort_direction'], ['ASC', 'DESC'])) {
+            $parameters['sort_direction'] = 'DESC';
+        }
+
         return $this->query
-            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
+            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'DESC');
     }
 
     protected function export(array $parameters = [], array $columns = ['*']): Collection|LengthAwarePaginator|array
