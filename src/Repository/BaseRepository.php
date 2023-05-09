@@ -66,7 +66,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     protected function sort(array $parameters): Builder
     {
-        if (isset($parameters['sort_direction']) && in_array($parameters['sort_direction'], ['ASC', 'DESC'])) {
+        if (isset($parameters['sort_direction']) && !in_array($parameters['sort_direction'], ['ASC', 'DESC'])) {
             $parameters['sort_direction'] = 'DESC';
         }
 
