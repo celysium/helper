@@ -123,6 +123,11 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->find($id);
     }
 
+    public function updateOrCreate(Model $model, array $conditions, array $values): Model
+    {
+        return $model->query()->updateOrCreate($conditions, $values);
+    }
+
     public function destroy(Model $model): bool
     {
         return $model->delete();

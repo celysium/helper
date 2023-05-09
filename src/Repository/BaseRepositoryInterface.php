@@ -26,6 +26,8 @@ interface BaseRepositoryInterface
 
     public function updateById(int|string $id, array $parameters): ?Model;
 
+    public function updateOrCreate(Model $model, array $conditions, array $values): Model;
+
     public function destroy(Model $model): bool;
 
     public function destroyById(int|string $id): bool;
