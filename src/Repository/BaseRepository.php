@@ -42,6 +42,8 @@ class BaseRepository implements BaseRepositoryInterface
             if (array_key_exists($field, $parameters)) {
                 if (is_callable($condition)) {
                     $query = $condition($parameters[$field]);
+                } elseif ($condition == 'like') {
+                    $query->where($field, $condition, "%" . $parameters[$field] . "%");
                 } else {
                     $query->where($field, $condition, $parameters[$field]);
                 }
@@ -67,8 +69,9 @@ class BaseRepository implements BaseRepositoryInterface
             $this->columns = $columns;
         }
 
-        if (isset($parameters['paginate']) && $parameters['paginate'] === false)
-            return $query->get($columns);
+
+        if (isset($parameters['paginate']) && $parameters['paginate'] == '')
+            return $this->query->get($columns);
         else
             return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
     }
