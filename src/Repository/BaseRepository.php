@@ -12,33 +12,24 @@ class BaseRepository implements BaseRepositoryInterface
 {
     private array $columns;
 
-    protected Builder $query;
-
     public function __construct(protected Model $model)
     {
     }
 
     public function index(array $parameters = [], array $columns = ['*']): LengthAwarePaginator|Collection
     {
-        $parameters = array_merge($this->parameters(), $parameters);
+        $query = $this->model->query();
 
-        $this->query = $this->model->query();
+        $query = $this->query($query, $parameters);
 
-        $this->query = $this->query($this->query, $parameters);
+        $query = $this->filters($query, $parameters);
 
-        $this->query = $this->filters($this->query, $parameters);
+        $query = $this->sort($query, $parameters);
 
-        $this->query = $this->sort($parameters);
-
-        return $this->export($parameters, $columns);
+        return $this->export($query, $parameters, $columns);
     }
 
     public function conditions(Builder $query): array
-    {
-        return [];
-    }
-
-    public function parameters(): array
     {
         return [];
     }
@@ -66,26 +57,23 @@ class BaseRepository implements BaseRepositoryInterface
         return $query;
     }
 
-    protected function sort(array $parameters): Builder
+    protected function sort(Builder $query, array $parameters): Builder
     {
-        if (isset($parameters['sort_direction']) && !in_array($parameters['sort_direction'], ['ASC', 'DESC'])) {
-            $parameters['sort_direction'] = 'DESC';
-        }
-
-        return $this->query
-            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'DESC');
+        return $query
+            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
     }
 
-    protected function export(array $parameters = [], array $columns = ['*']): Collection|LengthAwarePaginator|array
+    protected function export(Builder $query, array $parameters = [], array $columns = ['*']): Collection|LengthAwarePaginator|array
     {
         if ($columns != $this->columns) {
             $this->columns = $columns;
         }
 
+
         if (isset($parameters['paginate']) && $parameters['paginate'] == '')
             return $this->query->get($columns);
         else
-            return $this->query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
+            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
     }
 
     public function show(Model $model): Model
