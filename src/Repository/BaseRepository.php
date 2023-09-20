@@ -63,17 +63,18 @@ class BaseRepository implements BaseRepositoryInterface
             ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
     }
 
-    protected function export(Builder $query, array $parameters = [], array $columns = ['*']): Collection|LengthAwarePaginator|array
+    protected function export(Builder $query, array $parameters = [], array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
     {
         if ($columns != $this->columns) {
             $this->columns = $columns;
         }
 
-
-        if (isset($parameters['paginate']) && $parameters['paginate'] == '')
-            return $query->get($columns);
-        else
-            return $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns);
+        return match ($parameters['export_type'] ?? null) {
+            'builder'    => $query->select($columns),
+            'collection' => $query->get($columns),
+            'array'      => $query->get($columns)->toArray(),
+            default      => $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns)
+        };
     }
 
     public function show(Model $model): Model
