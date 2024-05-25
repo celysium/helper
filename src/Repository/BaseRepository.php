@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 
 class BaseRepository implements BaseRepositoryInterface
 {
-    private array $columns;
+    private array $columns = ['*'];
 
     public function __construct(protected Model $model)
     {
