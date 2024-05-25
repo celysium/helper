@@ -12,8 +12,6 @@ use Illuminate\Support\Collection;
 
 class BaseRepository implements BaseRepositoryInterface
 {
-    private array $columns = ['*'];
-
     public function __construct(protected Model $model)
     {
     }
@@ -68,10 +66,6 @@ class BaseRepository implements BaseRepositoryInterface
 
     protected function export(Builder $query, Request $request, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
     {
-        if ($columns != $this->columns) {
-            $this->columns = $columns;
-        }
-
         return match ($request['export_type'] ?? null) {
             'builder' => $query->select($columns),
             'collection' => $query->get($columns),
