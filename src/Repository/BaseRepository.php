@@ -5,8 +5,6 @@ namespace Celysium\Helper\Repository;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
@@ -16,17 +14,17 @@ class BaseRepository implements BaseRepositoryInterface
     {
     }
 
-    public function index(Request $request, array $columns = ['*']): LengthAwarePaginator|Collection
+    public function index(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
     {
         $query = $this->model->query();
 
-        $query = $this->query($query, $request);
+        $query = $this->query($query, $parameters);
 
-        $query = $this->filters($query, $request);
+        $query = $this->filters($query, $parameters);
 
-        $query = $this->sort($query, $request);
+        $query = $this->sort($query, $parameters);
 
-        return $this->export($query, $request, $columns);
+        return $this->export($query, $parameters, $columns);
     }
 
     public function conditions(Builder $query): array
@@ -34,9 +32,8 @@ class BaseRepository implements BaseRepositoryInterface
         return [];
     }
 
-    private function filters(Builder $query, Request $request): Builder
+    private function filters(Builder $query, array $parameters): Builder
     {
-        $parameters = $request->all();
         $conditions = $this->conditions($query);
         if (count($parameters) == 0 || count($conditions) == 0 || count($commons = array_intersect(array_keys($parameters), array_keys($conditions))) == 0) {
             return $query;
@@ -53,24 +50,24 @@ class BaseRepository implements BaseRepositoryInterface
         return $query;
     }
 
-    public function query(Builder $query, Request $request): Builder
+    public function query(Builder $query, array $parameters): Builder
     {
         return $query;
     }
 
-    protected function sort(Builder $query, Request $request): Builder
+    protected function sort(Builder $query, array $parameters): Builder
     {
         return $query
-            ->orderBy($request['sort_by'] ?? $this->model->getKeyName(), $request['sort_direction'] ?? 'desc');
+            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
     }
 
-    protected function export(Builder $query, Request $request, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
+    protected function export(Builder $query, array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
     {
-        return match ($request['export_type'] ?? null) {
+        return match ($parameters['export_type'] ?? null) {
             'builder' => $query->select($columns),
             'collection' => $query->get($columns),
             'array' => $query->get($columns)->toArray(),
-            default => $query->paginate($request['per_page'] ?? $this->model->getPerPage(), $columns)
+            default => $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns)
         };
     }
 
@@ -89,24 +86,24 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model->query()->findOrFail($id);
     }
 
-    public function store(FormRequest $request): Model
+    public function store(array $parameters): Model
     {
         return $this->model->query()
-            ->create($request->validated());
+            ->create($parameters);
     }
 
-    public function update(Model $model, FormRequest $request): Model
+    public function update(Model $model, array $parameters): Model
     {
-        $model->update($request->validated());
+        $model->update($parameters);
 
         return $model->refresh();
     }
 
-    public function updateById(int|string $id, FormRequest $request): Model
+    public function updateById(int|string $id, array $parameters): Model
     {
         $result = $this->model->query()
             ->where($this->model->getKeyName(), $id)
-            ->update($request->validated());
+            ->update($parameters);
 
         if ($result === 0) {
             throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
