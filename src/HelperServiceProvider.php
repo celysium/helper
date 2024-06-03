@@ -2,7 +2,7 @@
 
 namespace Celysium\Helper;
 
-use Celysium\Helper\Middlewares\IranianMobile;
+use Celysium\Helper\Middlewares\Mobile;
 use Illuminate\Support\ServiceProvider;
 
 class HelperServiceProvider extends ServiceProvider
@@ -16,7 +16,7 @@ class HelperServiceProvider extends ServiceProvider
     {
         $router = app('router');
 
-        $router->aliasMiddleware('iranian-mobile', IranianMobile::class);
+        $router->aliasMiddleware('mobile', Mobile::class);
     }
 
 }
