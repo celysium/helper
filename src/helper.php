@@ -2,10 +2,10 @@
 
 if (!function_exists('faToEn')) {
     /**
-     * @param string|int $value
+     * @param string|int|float $value
      * @return string
      */
-    function faToEn(string|int $value): string
+    function faToEn(string|int|float $value): string
     {
         $numbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return str_replace($numbers, array_keys($numbers), (string)$value);
@@ -14,10 +14,10 @@ if (!function_exists('faToEn')) {
 
 if (!function_exists('enToFa')) {
     /**
-     * @param string|int $value
+     * @param string|int|float $value
      * @return string
      */
-    function enToFa(string|int $value): string
+    function enToFa(string|int|float $value): string
     {
         $numbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
         return str_replace(array_keys($numbers), $numbers, (string)$value);
