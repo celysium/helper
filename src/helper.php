@@ -12,6 +12,18 @@ if (!function_exists('faToEn')) {
     }
 }
 
+if (!function_exists('enToFa')) {
+    /**
+     * @param string|int $value
+     * @return string
+     */
+    function enToFa(string|int $value): string
+    {
+        $numbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
+        return str_replace(array_keys($numbers), $numbers, (string)$value);
+    }
+}
+
 if (!function_exists('isMobile')) {
     function isMobile(string|int $value): bool
     {
