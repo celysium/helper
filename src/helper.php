@@ -1,5 +1,14 @@
 <?php
 
+if (!function_exists('slug')) {
+    function slug($string, $separator = '-'): string
+    {
+        $string = mb_strtolower(trim($string), 'UTF-8');
+        $string = preg_replace('/\s+/', ' ', $string);
+        return str_replace(['‌', ' ', '؟', '?', '.', ',', '(', ')', '&', '=', '/', '\\', '%'], [$separator, $separator, '', '', '', '', '', '', '', '', '', '', ''], $string);
+    }
+}
+
 if (!function_exists('faToEn')) {
     /**
      * @param string|int|float $value
