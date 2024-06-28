@@ -14,7 +14,7 @@ class Mobile implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        if (isMobile($value)) {
+        if (!isMobile($value)) {
             $fail(__('validation.invalid'));
         }
     }
