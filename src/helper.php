@@ -62,6 +62,6 @@ if (!function_exists('regularMobile')) {
         ) {
             return '0' . substr($mobile, -10);
         }
-        return false;
+        return $mobile;
     }
 }
