@@ -37,7 +37,8 @@ if (!function_exists('isMobile')) {
     function isMobile(string|int $value): bool
     {
         $mobile = faToEn($value);
-        if (preg_match('/^((9)[0-9]{9})+$/', $mobile) ||
+        if (preg_match('/^((09)[0-9]{9})+$/', $mobile) ||
+            preg_match('/^((9)[0-9]{9})+$/', $mobile) ||
             preg_match('/^((\+989)[0-9]{9})+$/', $mobile) ||
             preg_match('/^((0989)[0-9]{9})+$/', $mobile) ||
             preg_match('/^((989)[0-9]{9})+$/', $mobile)
