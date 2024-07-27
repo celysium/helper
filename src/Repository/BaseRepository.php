@@ -14,13 +14,13 @@ class BaseRepository implements BaseRepositoryInterface
     {
     }
 
-    public function index(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
+    public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
     {
         $query = $this->model->query();
 
         $query = $this->query($query, $parameters);
 
-        $query = $this->filters($query, $parameters);
+        $query = $this->filterConditions($query, $parameters);
 
         $query = $this->sort($query, $parameters);
 
@@ -32,19 +32,21 @@ class BaseRepository implements BaseRepositoryInterface
         return [];
     }
 
-    private function filters(Builder $query, array $parameters): Builder
+    private function filterConditions(Builder $query, array $parameters): Builder
     {
         $conditions = $this->conditions($query);
-        if (count($parameters) == 0 || count($conditions) == 0 || count($commons = array_intersect(array_keys($parameters), array_keys($conditions))) == 0) {
+        if (empty($parameters) || empty($conditions) || empty($commons = array_intersect(array_keys($parameters), array_keys($conditions)))) {
             return $query;
         }
         foreach ($commons as $field) {
-            if (is_callable($conditions[$field])) {
-                $query = $conditions[$field]($parameters[$field]);
-            } elseif ($conditions[$field] == 'like') {
-                $query->where($field, 'like', "%" . $parameters[$field] . "%");
+            $condition = $conditions[$field];
+            $value = $parameters[$field];
+            if (is_callable($condition)) {
+                $query = $condition($value);
+            } elseif ($condition == 'like') {
+                $query->where($field, 'like', "%$value%");
             } else {
-                $query->where($field, $conditions[$field], $parameters[$field]);
+                $query->where($field, $condition, $value);
             }
         }
         return $query;
@@ -71,11 +73,6 @@ class BaseRepository implements BaseRepositoryInterface
         };
     }
 
-    public function show(Model $model): Model
-    {
-        return $model;
-    }
-
     public function find(int|string $id): ?Model
     {
         return $this->model->query()->find($id);
@@ -99,7 +96,7 @@ class BaseRepository implements BaseRepositoryInterface
         return $model->refresh();
     }
 
-    public function updateById(int|string $id, array $parameters): Model
+    public function updateById(int|string $id, array $parameters): bool
     {
         $result = $this->model->query()
             ->where($this->model->getKeyName(), $id)
@@ -109,7 +106,7 @@ class BaseRepository implements BaseRepositoryInterface
             throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
         }
 
-        return $this->find($id);
+        return $result;
     }
 
     public function destroy(Model $model): bool

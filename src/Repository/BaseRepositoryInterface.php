@@ -8,13 +8,11 @@ use Illuminate\Support\Collection;
 
 interface BaseRepositoryInterface
 {
-    public function index(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection;
+    public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection;
 
     public function conditions(Builder $query): array;
 
     public function query(Builder $query, array $parameters): Builder;
-
-    public function show(Model $model): Model;
 
     public function find(int|string $id): ?Model;
 
@@ -24,7 +22,7 @@ interface BaseRepositoryInterface
 
     public function update(Model $model, array $parameters): Model;
 
-    public function updateById(int|string $id, array $parameters): ?Model;
+    public function updateById(int|string $id, array $parameters): bool;
 
     public function destroy(Model $model): bool;
 
