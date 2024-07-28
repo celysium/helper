@@ -33,8 +33,8 @@ if (!function_exists('enToFa')) {
     }
 }
 
-if (!function_exists('isMobile')) {
-    function isMobile(string|int $value): bool
+if (!function_exists('isIranianMobile')) {
+    function isIranianMobile(string|int $value): bool
     {
         $mobile = faToEn($value);
         if (preg_match('/^((09)[0-9]{9})+$/', $mobile) ||
@@ -49,8 +49,8 @@ if (!function_exists('isMobile')) {
     }
 }
 
-if (!function_exists('regularMobile')) {
-    function regularMobile(string|int $value): string|false
+if (!function_exists('regularIranianMobile')) {
+    function regularIranianMobile(string|int $value): string|false
     {
         $mobile = faToEn($value);
         if (preg_match('/^((9)[0-9]{9})+$/', $mobile)) {

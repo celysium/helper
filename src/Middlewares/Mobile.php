@@ -21,7 +21,7 @@ class Mobile
         $fields = $request->only(explode(',', $parameters));
 
         foreach ($fields as $key => $field) {
-            $request->merge([$key => regularMobile($field)]);
+            $request->merge([$key => regularIranianMobile($field)]);
         }
 
         return $next($request);
