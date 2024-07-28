@@ -2,6 +2,7 @@
 
 namespace Celysium\Helper\Service;
 
+use Celysium\Helper\Repository\BaseRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -10,13 +11,13 @@ use Illuminate\Support\Collection;
 
 class BaseService implements BaseServiceInterface
 {
-    public function __construct(protected BaseServiceInterface $repository)
+    public function __construct(protected BaseRepositoryInterface $repository)
     {
     }
 
     public function index(array $parameters= []): LengthAwarePaginator|Collection
     {
-        return $this->repository->index($parameters);
+        return $this->repository->list($parameters);
     }
 
     public function show(Model $model): Model
