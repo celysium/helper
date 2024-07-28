@@ -66,3 +66,10 @@ if (!function_exists('regularMobile')) {
         return $mobile;
     }
 }
+
+if (!function_exists('storageStore')) {
+    function storageStore(\Psr\Http\Message\StreamInterface|\Illuminate\Http\File|\Illuminate\Http\UploadedFile|string|resource $contents): string|false
+    {
+        return \Illuminate\Support\Facades\Storage::put(now()->format('Y/n/j'), $contents);
+    }
+}

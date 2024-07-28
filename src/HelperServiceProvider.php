@@ -14,9 +14,7 @@ class HelperServiceProvider extends ServiceProvider
 
     private function loadMiddlewares()
     {
-        $router = app('router');
-
-        $router->aliasMiddleware('mobile', Mobile::class);
+        app('router')->aliasMiddleware('mobile', Mobile::class);
     }
 
 }
