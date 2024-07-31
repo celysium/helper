@@ -12,10 +12,13 @@ use Illuminate\Support\Collection;
 
 /**
  * @property Model $model
+ * @property static string $entity
  */
 class BaseRepository implements BaseRepositoryInterface
 {
-    protected static Model|string $model;
+    protected static string $entity;
+
+    protected Model $model;
 
     /**
      * @param string $name
@@ -25,28 +28,30 @@ class BaseRepository implements BaseRepositoryInterface
      */
     public function __set(string $name, $value): void
     {
-        if ($name == 'model') {
-            $model = is_string($value) ? app($value) : $value;
-
-            if (!$model instanceof Model) {
-                throw new Exception("Class {$model} must be an instance of Illuminate\\Database\\Eloquent\\Model");
-            }
-
-            static::$model = $model;
+        if ($name == 'entity') {
+            $this->model($value);
         }
     }
 
-    public function __get(string $name)
+    /**
+     * @param string $value
+     * @return Model
+     * @throws Exception
+     */
+    public function model(string $value): Model
     {
-        if ($name == 'model') {
-            return static::$model;
+        $model = new $value;
+
+        if (!$model instanceof Model) {
+            throw new Exception("Class $model must be an instance of Illuminate\\Database\\Eloquent\\Model");
         }
-        return null;
+
+        return $this->model = $model;
     }
 
     public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
     {
-        $query = static::$model->query();
+        $query = $this->model->query();
 
         $query = $this->query($query, $parameters);
 
@@ -90,7 +95,7 @@ class BaseRepository implements BaseRepositoryInterface
     protected function sort(Builder $query, array $parameters): Builder
     {
         return $query
-            ->orderBy($parameters['sort_by'] ?? static::$model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
+            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
     }
 
     protected function export(Builder $query, array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
@@ -99,29 +104,29 @@ class BaseRepository implements BaseRepositoryInterface
             'builder' => $query->select($columns),
             'collection' => $query->get($columns),
             'array' => $query->get($columns)->toArray(),
-            default => $query->paginate($parameters['per_page'] ?? static::$model->getPerPage(), $columns)
+            default => $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns)
         };
     }
 
     public function find(int|string $id): ?Model
     {
-        return static::$model->query()->find($id);
+        return $this->model->query()->find($id);
     }
 
     public function findOrFail(int|string $id): ?Model
     {
-        return static::$model->query()->findOrFail($id);
+        return $this->model->query()->findOrFail($id);
     }
 
     public function findByField($field, $value, $columns = ['*']): ?Model
     {
-        return static::$model->query()
+        return $this->model->query()
             ->where($field, $value)->first($columns);
     }
 
     public function store(array $parameters): Model
     {
-        return static::$model->query()
+        return $this->model->query()
             ->create($parameters);
     }
 
@@ -134,12 +139,12 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function updateById(int|string $id, array $parameters): bool
     {
-        $result = static::$model->query()
-            ->where(static::$model->getKeyName(), $id)
+        $result = $this->model->query()
+            ->where($this->model->getKeyName(), $id)
             ->update($parameters);
 
         if ($result === 0) {
-            throw (new ModelNotFoundException)->setModel(get_class(static::$model), [$id]);
+            throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
         }
 
         return $result;
@@ -152,7 +157,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function destroyById(int|string $id): bool
     {
-        return static::$model->query()
+        return $this->model->query()
             ->where('id', $id)
             ->delete();
     }
