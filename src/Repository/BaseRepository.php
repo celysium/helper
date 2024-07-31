@@ -3,19 +3,50 @@
 namespace Celysium\Helper\Repository;
 
 use Celysium\Helper\Contracts\BaseRepositoryInterface;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 
+/**
+ * @property Model $model
+ */
 class BaseRepository implements BaseRepositoryInterface
 {
-    protected static Model $model;
+    protected static Model|string $model;
+
+    /**
+     * @param string $name
+     * @param $value
+     * @return void
+     * @throws Exception
+     */
+    public function __set(string $name, $value): void
+    {
+        if ($name == 'model') {
+            $model = is_string($value) ? app($value) : $value;
+
+            if (!$model instanceof Model) {
+                throw new Exception("Class {$model} must be an instance of Illuminate\\Database\\Eloquent\\Model");
+            }
+
+            static::$model = $model;
+        }
+    }
+
+    public function __get(string $name)
+    {
+        if ($name == 'model') {
+            return static::$model;
+        }
+        return null;
+    }
 
     public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
     {
-        $query = self::$model->query();
+        $query = static::$model->query();
 
         $query = $this->query($query, $parameters);
 
