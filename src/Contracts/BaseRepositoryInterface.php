@@ -1,5 +1,5 @@
 <?php
-namespace Celysium\Helper\Repository;
+namespace Celysium\Helper\Contracts;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +17,8 @@ interface BaseRepositoryInterface
     public function find(int|string $id): ?Model;
 
     public function findOrFail(int|string $id): ?Model;
+
+    public function findByField($field, $value, $columns = ['*']): ?Model;
 
     public function store(array $parameters): Model;
 

@@ -2,10 +2,9 @@
 
 namespace Celysium\Helper\Service;
 
-use Celysium\Helper\Repository\BaseRepositoryInterface;
-use Illuminate\Database\Eloquent\Builder;
+use Celysium\Helper\Contracts\BaseRepositoryInterface;
+use Celysium\Helper\Contracts\BaseServiceInterface;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 

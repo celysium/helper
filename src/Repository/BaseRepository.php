@@ -2,6 +2,7 @@
 
 namespace Celysium\Helper\Repository;
 
+use Celysium\Helper\Contracts\BaseRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -10,13 +11,11 @@ use Illuminate\Support\Collection;
 
 class BaseRepository implements BaseRepositoryInterface
 {
-    public function __construct(protected Model $model)
-    {
-    }
+    protected static Model $model;
 
     public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
     {
-        $query = $this->model->query();
+        $query = self::$model->query();
 
         $query = $this->query($query, $parameters);
 
@@ -60,7 +59,7 @@ class BaseRepository implements BaseRepositoryInterface
     protected function sort(Builder $query, array $parameters): Builder
     {
         return $query
-            ->orderBy($parameters['sort_by'] ?? $this->model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
+            ->orderBy($parameters['sort_by'] ?? static::$model->getKeyName(), $parameters['sort_direction'] ?? 'desc');
     }
 
     protected function export(Builder $query, array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
@@ -69,23 +68,29 @@ class BaseRepository implements BaseRepositoryInterface
             'builder' => $query->select($columns),
             'collection' => $query->get($columns),
             'array' => $query->get($columns)->toArray(),
-            default => $query->paginate($parameters['per_page'] ?? $this->model->getPerPage(), $columns)
+            default => $query->paginate($parameters['per_page'] ?? static::$model->getPerPage(), $columns)
         };
     }
 
     public function find(int|string $id): ?Model
     {
-        return $this->model->query()->find($id);
+        return static::$model->query()->find($id);
     }
 
     public function findOrFail(int|string $id): ?Model
     {
-        return $this->model->query()->findOrFail($id);
+        return static::$model->query()->findOrFail($id);
+    }
+
+    public function findByField($field, $value, $columns = ['*']): ?Model
+    {
+        return static::$model->query()
+            ->where($field, $value)->first($columns);
     }
 
     public function store(array $parameters): Model
     {
-        return $this->model->query()
+        return static::$model->query()
             ->create($parameters);
     }
 
@@ -98,12 +103,12 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function updateById(int|string $id, array $parameters): bool
     {
-        $result = $this->model->query()
-            ->where($this->model->getKeyName(), $id)
+        $result = static::$model->query()
+            ->where(static::$model->getKeyName(), $id)
             ->update($parameters);
 
         if ($result === 0) {
-            throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
+            throw (new ModelNotFoundException)->setModel(get_class(static::$model), [$id]);
         }
 
         return $result;
@@ -116,7 +121,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function destroyById(int|string $id): bool
     {
-        return $this->model->query()
+        return static::$model->query()
             ->where('id', $id)
             ->delete();
     }
