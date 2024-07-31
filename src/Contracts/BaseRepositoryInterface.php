@@ -14,9 +14,9 @@ interface BaseRepositoryInterface
 
     public function query(Builder $query, array $parameters): Builder;
 
-    public function find(int|string $id): ?Model;
+    public function find(int|string $id, $columns = ['*']): ?Model;
 
-    public function findOrFail(int|string $id): ?Model;
+    public function findOrFail(int|string $id, $columns = ['*']): ?Model;
 
     public function findByField($field, $value, $columns = ['*']): ?Model;
 

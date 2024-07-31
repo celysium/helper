@@ -108,14 +108,14 @@ class BaseRepository implements BaseRepositoryInterface
         };
     }
 
-    public function find(int|string $id): ?Model
+    public function find(int|string $id, $columns = ['*']): ?Model
     {
-        return $this->model->query()->find($id);
+        return $this->model->query()->find($id, $columns);
     }
 
-    public function findOrFail(int|string $id): ?Model
+    public function findOrFail(int|string $id, $columns = ['*']): ?Model
     {
-        return $this->model->query()->findOrFail($id);
+        return $this->model->query()->findOrFail($id, $columns);
     }
 
     public function findByField($field, $value, $columns = ['*']): ?Model
