@@ -75,7 +75,7 @@ if (!function_exists('storageStore')) {
 }
 
 if (!function_exists('storageDelete')) {
-    function storageStore(array|string $paths): string|false
+    function storageDelete(array|string $paths): string|false
     {
         return \Illuminate\Support\Facades\Storage::delete($paths);
     }
