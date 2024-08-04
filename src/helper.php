@@ -73,3 +73,10 @@ if (!function_exists('storageStore')) {
         return \Illuminate\Support\Facades\Storage::put(now()->format('Y/n/j'), $contents);
     }
 }
+
+if (!function_exists('storageDelete')) {
+    function storageStore(array|string $paths): string|false
+    {
+        return \Illuminate\Support\Facades\Storage::delete($paths);
+    }
+}
