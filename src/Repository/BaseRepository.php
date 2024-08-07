@@ -51,7 +51,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     public function list(array $parameters, callable $query = null, array $conditions = [], array $columns = ['*'], string $sort_by = null, string $sort_direction = null, string $export_type = null, int $per_page = null): LengthAwarePaginator|Collection
     {
-        $parameters = array_merge($parameters, compact('sort_by', 'sort_direction', 'export_type', 'per_page'));
+        $parameters = array_merge(compact('sort_by', 'sort_direction', 'export_type', 'per_page'), $parameters);
 
         $builder = $this->model->query();
 
