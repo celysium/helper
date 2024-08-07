@@ -66,8 +66,14 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->export($builder, $parameters, $columns);
     }
 
+    protected function conditions(Builder $query): array
+    {
+        return [];
+    }
+
     private function filterConditions(Builder $query, array $parameters, array $conditions): Builder
     {
+        $conditions = empty($conditions) ? $this->conditions($query) : $conditions;
         if (empty($parameters) || empty($conditions) || empty($commons = array_intersect(array_keys($parameters), array_keys($conditions)))) {
             return $query;
         }
