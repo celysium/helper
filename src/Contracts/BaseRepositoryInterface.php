@@ -8,11 +8,7 @@ use Illuminate\Support\Collection;
 
 interface BaseRepositoryInterface
 {
-    public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection;
-
-    public function conditions(Builder $query): array;
-
-    public function query(Builder $query, array $parameters): Builder;
+    public function list(array $parameters, callable $query = null, array $conditions = [], array $columns = ['*'], string $sort_by = null, string $sort_direction = null, string $export_type = null, int $per_page = null): LengthAwarePaginator|Collection;
 
     public function find(int|string $id, $columns = ['*']): ?Model;
 

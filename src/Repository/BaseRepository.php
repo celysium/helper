@@ -49,27 +49,25 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->model = $model;
     }
 
-    public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
+    public function list(array $parameters, callable $query = null, array $conditions = [], array $columns = ['*'], string $sort_by = null, string $sort_direction = null, string $export_type = null, int $per_page = null): LengthAwarePaginator|Collection
     {
-        $query = $this->model->query();
+        $parameters = array_merge($parameters, compact('sort_by', 'sort_direction', 'export_type', 'per_page'));
 
-        $query = $this->query($query, $parameters);
+        $builder = $this->model->query();
 
-        $query = $this->filterConditions($query, $parameters);
+        if ($query) {
+            $builder = $query($builder);
+        }
 
-        $query = $this->sort($query, $parameters);
+        $builder = $this->filterConditions($builder, $parameters, $conditions);
 
-        return $this->export($query, $parameters, $columns);
+        $builder = $this->sort($builder, $parameters);
+
+        return $this->export($builder, $parameters, $columns);
     }
 
-    public function conditions(Builder $query): array
+    private function filterConditions(Builder $query, array $parameters, array $conditions): Builder
     {
-        return [];
-    }
-
-    private function filterConditions(Builder $query, array $parameters): Builder
-    {
-        $conditions = $this->conditions($query);
         if (empty($parameters) || empty($conditions) || empty($commons = array_intersect(array_keys($parameters), array_keys($conditions)))) {
             return $query;
         }
@@ -87,11 +85,6 @@ class BaseRepository implements BaseRepositoryInterface
         return $query;
     }
 
-    public function query(Builder $query, array $parameters): Builder
-    {
-        return $query;
-    }
-
     protected function sort(Builder $query, array $parameters): Builder
     {
         return $query
@@ -100,7 +93,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     protected function export(Builder $query, array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
     {
-        return match ($parameters['export_type'] ?? null) {
+        return match ($parameters['export_type']) {
             'builder' => $query->select($columns),
             'collection' => $query->get($columns),
             'array' => $query->get($columns)->toArray(),
