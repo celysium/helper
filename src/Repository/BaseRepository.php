@@ -116,11 +116,15 @@ class BaseRepository implements BaseRepositoryInterface
     {
         return $this->model->query()->findOrFail($id, $columns);
     }
-
     public function findByField($field, $value, $columns = ['*']): ?Model
     {
         return $this->model->query()
             ->where($field, $value)->first($columns);
+    }
+    public function findOrFailByField($field, $value, $columns = ['*']): ?Model
+    {
+        return $this->model->query()
+            ->where($field, $value)->firstOrFail($columns);
     }
 
     public function store(array $parameters): Model

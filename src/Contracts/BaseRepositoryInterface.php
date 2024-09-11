@@ -16,6 +16,8 @@ interface BaseRepositoryInterface
 
     public function findByField($field, $value, $columns = ['*']): ?Model;
 
+    public function findOrFailByField($field, $value, $columns = ['*']): ?Model;
+
     public function store(array $parameters): Model;
 
     public function update(Model $model, array $parameters): Model;
