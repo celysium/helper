@@ -18,62 +18,60 @@ class BaseRepository implements BaseRepositoryInterface
 {
     protected static string $entity;
 
-    protected Model $model;
-
     /**
      * @param string $name
-     * @param $value
-     * @return void
+     * @return Model|void
      * @throws Exception
      */
-    public function __set(string $name, $value): void
+    public function __get(string $name)
     {
-        if ($name == 'entity') {
-            $this->model($value);
+        if ($name == 'model') {
+            return static::instance();
         }
     }
 
     /**
-     * @param string $value
      * @return Model
      * @throws Exception
      */
-    public function model(string $value): Model
+    public static function instance(): Model
     {
-        $model = new $value;
+        $instance = new static::$entity();
 
-        if (!$model instanceof Model) {
-            throw new Exception("Class $model must be an instance of Illuminate\\Database\\Eloquent\\Model");
+        if (!$instance instanceof Model) {
+            throw new Exception("Class ". static::$entity ." must be an instance of Illuminate\\Database\\Eloquent\\Model");
         }
 
-        return $this->model = $model;
+        return $instance;
     }
 
-    public function list(array $parameters, callable $query = null, array $conditions = [], array $columns = ['*'], string $sort_by = null, string $sort_direction = null, string $export_type = null, int $per_page = null): LengthAwarePaginator|Collection
+    public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
     {
-        $parameters = array_merge(compact('sort_by', 'sort_direction', 'export_type', 'per_page'), $parameters);
-
         $builder = $this->model->query();
 
-        if ($query) {
-            $builder = $query($builder);
-        }
+        $builder = $this->query($builder, $parameters);
 
-        $builder = $this->filterConditions($builder, $parameters, $conditions);
+        $builder = $this->filterConditions($builder, $parameters);
 
         $builder = $this->sort($builder, $parameters);
 
         return $this->export($builder, $parameters, $columns);
     }
 
-    protected function conditions(Builder $query): array
+    public function query(Builder $query, array $parameters): Builder
+    {
+        return $query;
+    }
+
+
+    public function conditions(Builder $query): array
     {
         return [];
     }
 
-    private function filterConditions(Builder $query, array $parameters, array $conditions): Builder
+    private function filterConditions(Builder $query, array $parameters): Builder
     {
-        $conditions = empty($conditions) ? $this->conditions($query) : $conditions;
+        $conditions = $this->conditions($query);
         if (empty($parameters) || empty($conditions) || empty($commons = array_intersect(array_keys($parameters), array_keys($conditions)))) {
             return $query;
         }
@@ -99,7 +97,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     protected function export(Builder $query, array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
     {
-        return match ($parameters['export_type']) {
+        return match ($parameters['export']) {
             'builder' => $query->select($columns),
             'collection' => $query->get($columns),
             'array' => $query->get($columns)->toArray(),
@@ -119,18 +117,18 @@ class BaseRepository implements BaseRepositoryInterface
     public function findByField($field, $value, $columns = ['*']): ?Model
     {
         return $this->model->query()
-            ->where($field, $value)->first($columns);
+                           ->where($field, $value)->first($columns);
     }
     public function findOrFailByField($field, $value, $columns = ['*']): ?Model
     {
         return $this->model->query()
-            ->where($field, $value)->firstOrFail($columns);
+                           ->where($field, $value)->firstOrFail($columns);
     }
 
     public function store(array $parameters): Model
     {
         return $this->model->query()
-            ->create($parameters);
+                           ->create($parameters);
     }
 
     public function update(Model $model, array $parameters): Model
@@ -143,8 +141,8 @@ class BaseRepository implements BaseRepositoryInterface
     public function updateById(int|string $id, array $parameters): bool
     {
         $result = $this->model->query()
-            ->where($this->model->getKeyName(), $id)
-            ->update($parameters);
+                              ->where($this->model->getKeyName(), $id)
+                              ->update($parameters);
 
         if ($result === 0) {
             throw (new ModelNotFoundException)->setModel(get_class($this->model), [$id]);
@@ -161,7 +159,7 @@ class BaseRepository implements BaseRepositoryInterface
     public function destroyById(int|string $id): bool
     {
         return $this->model->query()
-            ->where('id', $id)
-            ->delete();
+                           ->where('id', $id)
+                           ->delete();
     }
 }
