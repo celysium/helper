@@ -8,9 +8,13 @@ use Illuminate\Support\Collection;
 
 interface BaseRepositoryInterface
 {
+    public static function instance(): Model;
+
     public function all(array $columns = ['*']): Collection;
 
     public function list(array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array;
+
+    public function query(array $parameters): Builder;
 
     public function find(int|string $id, $columns = ['*']): ?Model;
 
