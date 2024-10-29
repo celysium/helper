@@ -45,7 +45,12 @@ class BaseRepository implements BaseRepositoryInterface
         return $instance;
     }
 
-    public function list(array $parameters, array $columns = ['*']): LengthAwarePaginator|Collection
+    public function all(array $columns = ['*']): Collection
+    {
+        return $this->model->query()->get($columns);
+    }
+
+    public function list(array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
     {
         $builder = $this->model->query();
 
