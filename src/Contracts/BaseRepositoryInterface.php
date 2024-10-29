@@ -14,7 +14,7 @@ interface BaseRepositoryInterface
 
     public function list(array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array;
 
-    public function query(array $parameters): Builder;
+    public function query(array $parameters = []): Builder;
 
     public function find(int|string $id, $columns = ['*']): ?Model;
 
