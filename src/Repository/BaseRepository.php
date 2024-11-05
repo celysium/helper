@@ -63,7 +63,7 @@ class BaseRepository implements BaseRepositoryInterface
         return $this->export($builder, $parameters, $columns);
     }
 
-    public function query(array $parameters = []): Builder
+    public function query(): Builder
     {
         return $this->model->query();
     }
