@@ -102,7 +102,7 @@ class BaseRepository implements BaseRepositoryInterface
 
     protected function export(Builder $query, array $parameters, array $columns = ['*']): Builder|Collection|LengthAwarePaginator|array
     {
-        return match ($parameters['export']) {
+        return match ($parameters['export'] ?? null) {
             'builder' => $query->select($columns),
             'collection' => $query->get($columns),
             'array' => $query->get($columns)->toArray(),
