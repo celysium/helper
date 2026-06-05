@@ -77,6 +77,7 @@ class BaseRepository implements BaseRepositoryInterface
     private function filterConditions(Builder $query, array $parameters): Builder
     {
         $conditions = $this->conditions($query);
+        $parameters = array_filter($parameters);
         if (empty($parameters) || empty($conditions) || empty($commons = array_intersect(array_keys($parameters), array_keys($conditions)))) {
             return $query;
         }
