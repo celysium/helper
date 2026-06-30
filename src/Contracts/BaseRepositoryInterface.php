@@ -20,9 +20,9 @@ interface BaseRepositoryInterface
 
     public function findOrFail(int|string $id, $columns = ['*']): ?Model;
 
-    public function findByField($field, $value, $columns = ['*']): ?Model;
+    public function findByFields(array $conditions, $columns = ['*']): ?Model;
 
-    public function findOrFailByField($field, $value, $columns = ['*']): ?Model;
+    public function findOrFailByFields(array $conditions, $columns = ['*']): ?Model;
 
     public function store(array $parameters): Model;
 
